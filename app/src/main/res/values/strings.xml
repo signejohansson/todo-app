@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">ToDo-list</string>
+    <string name="app_name">Todo-list</string>
+    <string name="title"><u>Todo-list</u></string>
 </resources>
