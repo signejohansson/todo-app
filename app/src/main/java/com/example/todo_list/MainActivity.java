@@ -8,62 +8,66 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.todo_list.db.TaskContract;
 import com.example.todo_list.db.TaskDbHelper;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private TaskDbHelper mHelper;
-    private ListView mTaskListView;
-    private ArrayAdapter<String> mAdapter;
+    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mHelper = new TaskDbHelper(this);
+        mRecyclerView = findViewById(R.id.recyclerView);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        FloatingActionButton fab = findViewById(R.id.addTaskButton);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showAddTaskDialog();
+            }
+        });
+
+        updateUI();
+    }
+
+    private void updateUI() {
         SQLiteDatabase db = mHelper.getReadableDatabase();
-        mTaskListView = (ListView) findViewById(R.id.list_todo);
         Cursor cursor = db.query(TaskContract.TaskEntry.TABLE,
                 new String[]{TaskContract.TaskEntry._ID, TaskContract.TaskEntry.COL_TASK_TITLE},
                 null, null, null, null, null);
-        while(cursor.moveToNext()) {
-            int idx = cursor.getColumnIndex(TaskContract.TaskEntry.COL_TASK_TITLE);
-            Log.d(TAG, "Task: " + cursor.getString(idx));
+
+        List<String> taskList = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            int columnIndex = cursor.getColumnIndex(TaskContract.TaskEntry.COL_TASK_TITLE);
+            String task = cursor.getString(columnIndex);
+            taskList.add(task);
         }
+
+        TaskAdapter mAdapter = new TaskAdapter(taskList);
+        mRecyclerView.setAdapter(mAdapter);
+
         cursor.close();
         db.close();
-        updateUI();
     }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        mHelper = new TaskDbHelper(this);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_add_task) {
-            showAddTaskDialog();
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
-        }
-    }
-
     private void showAddTaskDialog() {
         final EditText taskEditText = new EditText(this);
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -94,35 +98,9 @@ public class MainActivity extends AppCompatActivity {
         db.close();
     }
 
-    private void updateUI() {
-        ArrayList<String> taskList = new ArrayList<>();
-        SQLiteDatabase db = mHelper.getReadableDatabase();
-        Cursor cursor = db.query(TaskContract.TaskEntry.TABLE,
-                new String[]{TaskContract.TaskEntry._ID, TaskContract.TaskEntry.COL_TASK_TITLE},
-                null, null, null, null, null);
-        while (cursor.moveToNext()) {
-            int idx = cursor.getColumnIndex(TaskContract.TaskEntry.COL_TASK_TITLE);
-            taskList.add(cursor.getString(idx));
-        }
-
-        if (mAdapter == null) {
-            mAdapter = new ArrayAdapter<>(this,
-                    R.layout.item_todo,
-                    R.id.task_title,
-                    taskList);
-            mTaskListView.setAdapter(mAdapter);
-        } else {
-            mAdapter.clear();
-            mAdapter.addAll(taskList);
-            mAdapter.notifyDataSetChanged();
-        }
-        cursor.close();
-        db.close();
-    }
-
     public void deleteTask(View view) {
         View parent = (View) view.getParent();
-        TextView taskTextView = (TextView) parent.findViewById(R.id.task_title);
+        TextView taskTextView = parent.findViewById(R.id.task_title);
         String task = String.valueOf(taskTextView.getText());
         SQLiteDatabase db = mHelper.getWritableDatabase();
         db.delete(TaskContract.TaskEntry.TABLE,
