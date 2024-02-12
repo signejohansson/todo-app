@@ -14,11 +14,14 @@
 
 
     <Button
+        android:contentDescription="@string/doneButton"
         android:id="@+id/task_delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:text="Done"
-        android:onClick="deleteTask"/>
+        android:text="@string/taskButtonText"
+        android:onClick="deleteTask"
+        android:backgroundTint="@color/mintgreen"
+        android:textColor="@color/black"/>
 
 </RelativeLayout>
