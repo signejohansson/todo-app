@@ -4,10 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private TaskDbHelper mHelper;
     private RecyclerView mRecyclerView;
+    private Vibrator vibrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         mHelper = new TaskDbHelper(this);
         mRecyclerView = findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         FloatingActionButton fab = findViewById(R.id.addTaskButton);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -107,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
                 TaskContract.TaskEntry.COL_TASK_TITLE + " = ?",
                 new String[]{task});
         db.close();
+        vibrator.vibrate(250);
         updateUI();
     }
 }
