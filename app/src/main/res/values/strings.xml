@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Todo-list</string>
     <string name="title"><u>Todo-list</u></string>
+    <string name="fabDescription">Press this to add a task.</string>
+    <string name="doneButton">Press this when the task is done.</string>
+    <string name="taskButtonText">Done</string>
+
 </resources>
